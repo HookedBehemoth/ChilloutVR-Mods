@@ -60,18 +60,21 @@ pub fn decrypt_internal(guid: &[u8], bytes: &[u8], key_frag: &[u8], dst: &mut [u
     let mut random = CVRRand::new(compute_crc(guid), total_size);
 
     // Segment data
-    let mut segments: [MaybeUninit<Range<usize>>; 100] =
-        unsafe { MaybeUninit::uninit().assume_init() };
+    #[derive(Clone, Copy)]
+    struct Segment {
+        offset: usize,
+        end: usize,
+    }
+    let mut segments: [Segment; 100] = [Segment { offset: 0, end: 0 }; 100];
     let mut i = 0;
     let mut offset = 0;
     while offset < total_size {
         let len = random.next();
         let end = (offset + len).min(total_size);
-        segments[i] = MaybeUninit::new(offset..end);
+        segments[i] = Segment { offset, end };
         i += 1;
         offset = end;
     }
-    let segments: &mut [Range<usize>; 100] = &mut unsafe { mem::transmute(segments) };
     let segments = &mut segments[..i];
 
     // Scramble
@@ -84,19 +87,19 @@ pub fn decrypt_internal(guid: &[u8], bytes: &[u8], key_frag: &[u8], dst: &mut [u
     // Reassemble
     let mut offset = 0;
     for segment in segments.iter() {
-        let length = segment.len();
+        let length = segment.end - segment.offset;
         match (offset > bytes.len(), offset + length > bytes.len()) {
             (false, false) => {
-                dst[segment.start..segment.end].copy_from_slice(&bytes[offset..offset + length]);
+                dst[segment.offset..segment.end].copy_from_slice(&bytes[offset..offset + length]);
             }
             (false, true) => {
                 let remainder = bytes.len() - offset;
-                let temp = segment.start + remainder;
-                dst[segment.start..temp].copy_from_slice(&bytes[offset..]);
+                let temp = segment.offset + remainder;
+                dst[segment.offset..temp].copy_from_slice(&bytes[offset..]);
                 dst[temp..segment.end].copy_from_slice(&key_frag[..length - remainder]);
             }
             (true, _) => {
-                dst[segment.start..segment.end].copy_from_slice(
+                dst[segment.offset..segment.end].copy_from_slice(
                     &key_frag[offset - bytes.len()..offset + length - bytes.len()],
                 );
             }
