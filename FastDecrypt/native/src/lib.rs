@@ -42,13 +42,7 @@ impl CVRRand {
         }
     }
     pub fn next(&mut self) -> usize {
-        self.state = (self
-            .state
-            .overflowing_mul(self.crc)
-            .0
-            .overflowing_add(self.state)
-            .0)
-            % self.frag_size
+        self.state = self.state.wrapping_mul(self.crc).wrapping_add(self.state) % self.frag_size
             + self.frag_size;
         self.state as usize
     }
