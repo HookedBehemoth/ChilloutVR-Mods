@@ -1,0 +1,6 @@
+target
+tests
+obj
+bin
+Output
+*.bat

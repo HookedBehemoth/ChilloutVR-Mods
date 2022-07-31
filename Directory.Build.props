@@ -1,0 +1,46 @@
+<Project>
+    <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
+        <ChilloutVRPath>C:\Program Files (x86)\Steam\steamapps\common\ChilloutVR</ChilloutVRPath>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(OS)' == 'Unix' ">
+        <ChilloutVRPath>$(HOME)/.steam/steam/steamapps/common/ChilloutVR</ChilloutVRPath>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <VrcReferences>true</VrcReferences>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+        <Version>1.4.1.0</Version>
+        
+        <AssemblySearchPaths>$(AssemblySearchPaths);$(ChilloutVRPath)\MelonLoader;$(ChilloutVRPath)\ChilloutVR_Data\Managed</AssemblySearchPaths>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Reference Include="MelonLoader">
+            <Private>False</Private>
+            <SpecificVersion>False</SpecificVersion>
+        </Reference>
+        <Reference Include="0Harmony">
+            <Private>False</Private>
+            <SpecificVersion>False</SpecificVersion>
+        </Reference>
+        <!-- Game assemblies -->
+        <Reference Include="Assembly-CSharp">
+            <Private>False</Private>
+            <SpecificVersion>False</SpecificVersion>
+        </Reference>
+    </ItemGroup>
+    
+    <PropertyGroup>
+        <OutputPath>$(MsBuildThisFileDirectory)\Output\$(Configuration)\</OutputPath>
+        <LangVersion>preview</LangVersion>
+    </PropertyGroup>
+
+    <Target Name="PostClean" AfterTargets="Clean">
+        <RemoveDir Directories="$(MsBuildThisFileDirectory)\Output"/>
+        <RemoveDir Directories="$(BaseIntermediateOutputPath)" />
+        <RemoveDir Directories="$(BaseOutputPath)" />
+    </Target>
+</Project>

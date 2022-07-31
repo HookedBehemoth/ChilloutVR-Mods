@@ -1,0 +1,20 @@
+[package]
+name = "native"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+crc = "2.0"
+
+[lib]
+name = "libdec"
+crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+opt-level = "z"
+lto = "fat"
+# strip = true
+panic = "abort"
+codegen-units = 1
