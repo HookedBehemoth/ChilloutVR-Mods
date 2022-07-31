@@ -31,7 +31,6 @@ fn compute_crc(data: &str) -> u32 {
     X32.checksum(data.as_bytes())
 }
 
-#[derive(Debug)]
 struct CVRRand {
     state: i64,
     crc: i64,
@@ -39,6 +38,13 @@ struct CVRRand {
 }
 
 impl CVRRand {
+    pub fn new(crc: u32, size: usize) -> Self {
+        Self {
+            state: 0x3fffffefffffff_i64,
+            crc: crc.into(),
+            frag_size: u32::max((size / 100) as u32, 1000).into(),
+        }
+    }
     pub fn next(&mut self) -> usize {
         self.state = (self
             .state
@@ -61,14 +67,11 @@ pub fn decrypt_internal(guid: &str, bytes: &[u8], key_frag: &[u8], dst: &mut [u8
     let total_size = bytes.len() + key_frag.len();
 
     // Seed PRNG
-    let mut random = CVRRand {
-        state: 18014398241046527_i64,
-        crc: compute_crc(guid).into(),
-        frag_size: u32::max(total_size as u32 / 100, 1000).into(),
-    };
+    let mut random = CVRRand::new(compute_crc(guid), total_size);
 
     // Segment data
-    let mut segments: [MaybeUninit<Range<usize>>; 100] = unsafe { MaybeUninit::uninit().assume_init() };
+    let mut segments: [MaybeUninit<Range<usize>>; 100] =
+        unsafe { MaybeUninit::uninit().assume_init() };
     let mut i = 0;
     let mut offset = 0;
     while offset < total_size {
@@ -78,7 +81,7 @@ pub fn decrypt_internal(guid: &str, bytes: &[u8], key_frag: &[u8], dst: &mut [u8
         i += 1;
         offset = end;
     }
-    let mut segments: [Range<usize>; 100] = unsafe { mem::transmute(segments) };
+    let segments: &mut [Range<usize>; 100] = &mut unsafe { mem::transmute(segments) };
     let segments = &mut segments[..i];
 
     // Scramble
@@ -154,10 +157,10 @@ fn test_compute_crc() {
 
 #[test]
 fn test_random() {
-    let pairs: &[(u32, u32, &[usize])] = &[
+    let pairs: &[(u32, usize, &[usize])] = &[
         (
             510747253,
-            24985,
+            2498515,
             &[
                 1856, 38009, 40561, 33484, 29916, 38479, 42136, 29459, 37426, 49824, 32576, 26129,
                 45936, 47509,
@@ -165,7 +168,7 @@ fn test_random() {
         ),
         (
             395872363,
-            27862,
+            2786283,
             &[
                 41700, 48260, 48970, 51128, 32886, 31124, 46096, 40666, 33580, 55366, 41372, 55190,
                 33538, 36716,
@@ -173,7 +176,7 @@ fn test_random() {
         ),
         (
             4284363129,
-            27599,
+            2759924,
             &[
                 32766, 35213, 50837, 52719, 52656, 28388, 34509, 35052, 28684, 37696, 44844, 55046,
                 48340, 47186,
@@ -181,7 +184,7 @@ fn test_random() {
         ),
         (
             2976536806,
-            63472,
+            6347242,
             &[
                 66489, 95311, 106793, 85663, 116057, 72031, 119673, 97295, 97625, 116255, 83209,
                 87151, 125049, 94975,
@@ -189,7 +192,7 @@ fn test_random() {
         ),
         (
             693157058,
-            6900,
+            690036,
             &[
                 9717, 11403, 7977, 11943, 9237, 7983, 13797, 9423, 10257, 12663, 10917, 9603,
                 10677, 11343,
@@ -197,7 +200,7 @@ fn test_random() {
         ),
         (
             2690702873,
-            12273,
+            1227329,
             &[
                 13213, 17016, 13056, 19971, 13800, 17928, 13323, 20574, 19023, 13038, 13587, 24204,
                 13707, 13581,
@@ -205,7 +208,7 @@ fn test_random() {
         ),
         (
             4047935656,
-            29742,
+            2974248,
             &[
                 44043, 49539, 53073, 40377, 47409, 55827, 56337, 58191, 56883, 55977, 39387, 40311,
                 54867, 45849,
@@ -213,7 +216,7 @@ fn test_random() {
         ),
         (
             4085790074,
-            64424,
+            6442418,
             &[
                 85765, 97567, 93445, 72351, 81749, 69951, 89629, 113871, 106485, 83223, 100813,
                 122247, 82205, 103887,
@@ -221,7 +224,7 @@ fn test_random() {
         ),
         (
             2255572015,
-            189810,
+            18981052,
             &[
                 266060, 205540, 304850, 205900, 379280, 362050, 348140, 282490, 222770, 318760,
                 271550, 249190, 266060, 205540,
@@ -229,11 +232,7 @@ fn test_random() {
         ),
     ];
     for &(crc, size, want) in pairs {
-        let mut random = CVRRand {
-            state: 18014398241046527_i64,
-            crc: crc.into(),
-            frag_size: size.into(),
-        };
+        let mut random = CVRRand::new(crc, size);
         let got = (0..want.len()).map(|_| random.next()).collect::<Vec<_>>();
         assert_eq!(&got, want);
     }
