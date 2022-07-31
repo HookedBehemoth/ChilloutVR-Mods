@@ -21,7 +21,7 @@ fn main() {
         let mut dec = Vec::<u8>::new();
         dec.resize(enc.len() + key.len(), 0x42);
         let now = Instant::now();
-        libdec::decrypt_internal(guid, &enc, &key, &mut dec);
+        libdec::decrypt_internal(guid.as_bytes(), &enc, &key, &mut dec);
         let elapsed = now.elapsed();
         println!(
             "guid: {guid}, elapsed: {elapsed:?}, {} MiB/s",

@@ -89,10 +89,7 @@ public class Starter : MelonMod
             {
                 fixed (byte* b = bytes, k = keyFrag, d = __result)
                 {
-                    fixed (char* p = guid)
-                    {
-                        Decrypt(p, (nuint)guid.Length, b, (nuint)bytes.Length, k, (nuint)keyFrag.Length, d);
-                    }
+                    Decrypt(guid, (nuint)guid.Length, b, (nuint)bytes.Length, k, (nuint)keyFrag.Length, d);
                 }
             }
 
@@ -105,8 +102,8 @@ public class Starter : MelonMod
         }
     }
 
-    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-    public unsafe delegate void DecryptDelegate(char* guid_ptr, nuint guid_len, byte* data_ptr, nuint data_len, byte* key_ptr, nuint key_len, byte* result_ptr);
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    public unsafe delegate void DecryptDelegate(string guid_ptr, nuint guid_len, byte* data_ptr, nuint data_len, byte* key_ptr, nuint key_len, byte* result_ptr);
 
     T GetPointer<T>(IntPtr lib, string name) where T : MulticastDelegate
     {

@@ -1,15 +1,11 @@
 use crc::Crc;
-use std::ffi::OsString;
-use std::mem::{self, MaybeUninit};
-use std::ops::Range;
-use std::os::windows::prelude::*;
 
 /// # Safety
 ///
 /// We have to trust the caller to supply valid ptr/sz pairs to the function.
 #[no_mangle]
 pub unsafe extern "C" fn decrypt(
-    guid_ptr: *const u16,
+    guid_ptr: *const u8,
     guid_len: usize,
     data_ptr: *const u8,
     data_len: usize,
@@ -17,18 +13,18 @@ pub unsafe extern "C" fn decrypt(
     key_len: usize,
     dst_ptr: *mut u8,
 ) {
-    let guid = OsString::from_wide(std::slice::from_raw_parts(guid_ptr, guid_len));
+    let guid = std::slice::from_raw_parts(guid_ptr, guid_len);
     let data = std::slice::from_raw_parts(data_ptr, data_len);
     let key = std::slice::from_raw_parts(key_ptr, key_len);
     let dst = std::slice::from_raw_parts_mut(dst_ptr, data_len + key_len);
 
-    decrypt_internal(guid.to_str().unwrap(), data, key, dst);
+    decrypt_internal(&guid, data, key, dst);
 }
 
 const X32: Crc<u32> = Crc::<u32>::new(&crc::CRC_32_ISO_HDLC);
 
-fn compute_crc(data: &str) -> u32 {
-    X32.checksum(data.as_bytes())
+fn compute_crc(data: &[u8]) -> u32 {
+    X32.checksum(data)
 }
 
 struct CVRRand {
@@ -63,7 +59,7 @@ impl CVRRand {
 /// - Segment the data in chunks of random length
 /// - Scramble segments, skipping the first one (UnityFS header)
 /// - Reassemble the data with these segments
-pub fn decrypt_internal(guid: &str, bytes: &[u8], key_frag: &[u8], dst: &mut [u8]) {
+pub fn decrypt_internal(guid: &[u8], bytes: &[u8], key_frag: &[u8], dst: &mut [u8]) {
     let total_size = bytes.len() + key_frag.len();
 
     // Seed PRNG
@@ -118,39 +114,39 @@ pub fn decrypt_internal(guid: &str, bytes: &[u8], key_frag: &[u8], dst: &mut [u8
 #[test]
 fn test_compute_crc() {
     assert_eq!(
-        compute_crc("2c99f767-53b9-463c-aa99-791b04cd9003"),
+        compute_crc(b"2c99f767-53b9-463c-aa99-791b04cd9003"),
         510747253
     );
     assert_eq!(
-        compute_crc("8611ee9e-0c57-48d2-af32-7f980b0895db"),
+        compute_crc(b"8611ee9e-0c57-48d2-af32-7f980b0895db"),
         395872363
     );
     assert_eq!(
-        compute_crc("6586c486-4731-4fae-a2d2-de415cd8bcd6"),
+        compute_crc(b"6586c486-4731-4fae-a2d2-de415cd8bcd6"),
         4284363129
     );
     assert_eq!(
-        compute_crc("6b86cced-e17c-4f57-8bdf-812615773ce6"),
+        compute_crc(b"6b86cced-e17c-4f57-8bdf-812615773ce6"),
         2976536806
     );
     assert_eq!(
-        compute_crc("32ceb35d-24fa-469f-8aa4-23851ac68f84"),
+        compute_crc(b"32ceb35d-24fa-469f-8aa4-23851ac68f84"),
         693157058
     );
     assert_eq!(
-        compute_crc("17c267db-18c4-4900-bb73-ad323f082640"),
+        compute_crc(b"17c267db-18c4-4900-bb73-ad323f082640"),
         2690702873
     );
     assert_eq!(
-        compute_crc("5dc14ba2-7164-40e9-8b52-f55cf3129a24"),
+        compute_crc(b"5dc14ba2-7164-40e9-8b52-f55cf3129a24"),
         4047935656
     );
     assert_eq!(
-        compute_crc("67e08c5c-d918-478e-ad8d-58e884fa53b4"),
+        compute_crc(b"67e08c5c-d918-478e-ad8d-58e884fa53b4"),
         4085790074
     );
     assert_eq!(
-        compute_crc("9d1d8585-9c0b-40d9-8721-76f21cc745f2"),
+        compute_crc(b"9d1d8585-9c0b-40d9-8721-76f21cc745f2"),
         2255572015
     );
 }
@@ -262,7 +258,7 @@ fn test_decrypt() {
         let mut dec = Vec::<u8>::new();
         dec.resize(enc.len() + key.len(), 0x42);
         let now = Instant::now();
-        decrypt_internal(guid, &enc, &key, &mut dec);
+        decrypt_internal(guid.as_bytes(), &enc, &key, &mut dec);
         let elapsed = now.elapsed();
         println!(
             "guid: {guid}, elapsed: {elapsed:?}, {} MiB/s",
