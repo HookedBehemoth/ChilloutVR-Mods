@@ -49,8 +49,8 @@ impl CVRRand {
 }
 
 /// Steps:
-/// - Seed PRNG with CRC32 of the GUID and data length
-/// - Segment the data in chunks of random length
+/// - Seed PRNG with CRC32 of the GUID and clamp it between 1/100 and 2/100 of the data size
+/// - Segment the data in, at most, 100 chunks of random length
 /// - Scramble segments, skipping the first one (UnityFS header)
 /// - Reassemble the data with these segments
 pub fn decrypt_internal(guid: &[u8], bytes: &[u8], key_frag: &[u8], dst: &mut [u8]) {
