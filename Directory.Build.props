@@ -28,6 +28,11 @@
             <Private>False</Private>
             <SpecificVersion>False</SpecificVersion>
         </Reference>
+        <!-- Unity -->
+        <Reference Include="UnityEngine.CoreModule">
+            <Private>False</Private>
+            <SpecificVersion>False</SpecificVersion>
+        </Reference>
     </ItemGroup>
     
     <PropertyGroup>
