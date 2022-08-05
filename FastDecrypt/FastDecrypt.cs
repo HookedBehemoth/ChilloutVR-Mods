@@ -61,7 +61,8 @@ public class Starter : MelonMod
             LoggerInstance.Error("Native library load failed, mod won't work: {0}", error);
             return;
         }
-        Decrypt = GetPointer<DecryptDelegate>(NativeLibrary, "decrypt");
+
+        Decrypt = Marshal.GetDelegateForFunctionPointer<DecryptDelegate>(GetProcAddress(NativeLibrary, "decrypt"));
         if (Decrypt == null)
         {
             LoggerInstance.Error("Native library load failed, mod won't work: failed to find decrypt function");
@@ -104,14 +105,6 @@ public class Starter : MelonMod
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public unsafe delegate void DecryptDelegate(string guid_ptr, nuint guid_len, byte* data_ptr, nuint data_len, byte* key_ptr, nuint key_len, byte* result_ptr);
-
-    T GetPointer<T>(IntPtr lib, string name) where T : MulticastDelegate
-    {
-        var result = Marshal.GetDelegateForFunctionPointer<T>(GetProcAddress(lib, name));
-        if (result == null) LoggerInstance.Error($"Delegate for {name} not found! Bug?");
-
-        return result;
-    }
 
     [DllImport("kernel32", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
     static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
