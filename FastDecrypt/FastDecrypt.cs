@@ -7,7 +7,7 @@ using ABI_RC.Core;
 using HarmonyLib;
 using MelonLoader;
 
-[assembly: MelonInfo(typeof(FastDecrypt.Starter), nameof(FastDecrypt), "1.0", "Behemoth")]
+[assembly: MelonInfo(typeof(FastDecrypt.Starter), nameof(FastDecrypt), "1.1", "Behemoth")]
 [assembly: MelonGame("Alpha Blend Interactive", "ChilloutVR")]
 
 namespace FastDecrypt;
