@@ -10,7 +10,10 @@ crc = "2.0"
 
 [lib]
 name = "libdec"
-crate-type = ["cdylib", "rlib"]
+crate-type = ["cdylib"]
+
+[profile.dev]
+panic = "abort"
 
 [profile.release]
 opt-level = "z"

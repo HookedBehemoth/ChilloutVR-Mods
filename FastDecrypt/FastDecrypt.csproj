@@ -2,26 +2,26 @@
 
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CargoDir>native</CargoDir>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
-    <CargoTargetDir>native/target/x86_64-pc-windows-msvc</CargoTargetDir>
     <CargoFlags>--target x86_64-pc-windows-msvc</CargoFlags>
+    <CargoTargetDir>$(CargoDir)/target/x86_64-pc-windows-msvc</CargoTargetDir>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(OS)' == 'Unix' ">
     <!-- msvc target requires link.exe, not feasible on linux. -->
     <CargoFlags>--target x86_64-pc-windows-gnu</CargoFlags>
-    <CargoTargetDir>native/target/x86_64-pc-windows-gnu</CargoTargetDir>
+    <CargoTargetDir>$(CargoDir)/target/x86_64-pc-windows-gnu</CargoTargetDir>
   </PropertyGroup>
 
   <Target Name="Cargo build native library" BeforeTargets="PrepareForBuild">
-      <Error Condition=" '$(ChilloutVRPath)' == '' " Text="The ChilloutVRPath property is not set! Please set it! OS = $(OS)"/>
-      <Exec Command="cargo +nightly build -Z build-std=std,panic_abort -Z build-std-features=panic_immediate_abort --release --manifest-path native/Cargo.toml $(CargoFlags)"/>
+      <Exec Command="cargo build --release --manifest-path $(CargoDir)/Cargo.toml $(CargoFlags) "/>
   </Target>
 
   <Target Name="Cargo clean" AfterTargets="Clean">
-      <Exec Command="cargo clean --manifest-path native/Cargo.toml"/>
+      <Exec Command="cargo clean --manifest-path $(CargoDir)/Cargo.toml"/>
   </Target>
 
   <ItemGroup>
