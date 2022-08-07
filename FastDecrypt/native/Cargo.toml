@@ -18,6 +18,6 @@ panic = "abort"
 [profile.release]
 opt-level = "z"
 lto = "fat"
-# strip = true
+strip = true
 panic = "abort"
 codegen-units = 1

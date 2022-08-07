@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <Target Name="Cargo build native library" BeforeTargets="PrepareForBuild">
-      <Exec Command="cargo build --release --manifest-path $(CargoDir)/Cargo.toml $(CargoFlags) "/>
+      <Exec Command="cargo build --release --manifest-path $(CargoDir)/Cargo.toml $(CargoFlags) --lib"/>
   </Target>
 
   <Target Name="Cargo clean" AfterTargets="Clean">

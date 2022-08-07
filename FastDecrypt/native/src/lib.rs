@@ -23,6 +23,14 @@ mod msvc {
     }
 }
 
+#[cfg(target_env = "gnu")]
+mod mingw {
+    #[no_mangle]
+    extern "system" fn DllMainCRTStartup(_: *const u8, _: u32, _: *const u8) -> u32 {
+        1
+    }
+}
+
 /// # Safety
 ///
 /// We have to trust the caller to supply valid ptr/sz pairs to the function.
