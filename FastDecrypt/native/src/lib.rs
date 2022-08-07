@@ -1,23 +1,26 @@
 #![no_std]
 
-#[link(name = "vcruntime")]
-extern "C" {}
-
 #[panic_handler]
 #[cfg(not(test))]
 fn panic(_: &core::panic::PanicInfo) -> ! {
     loop {}
 }
 
-#[no_mangle]
-pub static _fltused: i32 = 0;
+#[cfg(target_env = "msvc")]
+mod msvc {
+    #[link(name = "vcruntime")]
+    extern "C" {}
 
-#[no_mangle]
-extern "system" fn __chkstk() {}
+    #[no_mangle]
+    pub static _fltused: i32 = 0;
 
-#[no_mangle]
-extern "system" fn _DllMainCRTStartup(_: *const u8, _: u32, _: *const u8) -> u32 {
-    1
+    #[no_mangle]
+    extern "system" fn __chkstk() {}
+
+    #[no_mangle]
+    extern "system" fn _DllMainCRTStartup(_: *const u8, _: u32, _: *const u8) -> u32 {
+        1
+    }
 }
 
 /// # Safety
