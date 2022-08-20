@@ -1,0 +1,29 @@
+[package]
+name = "native"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "fastser"
+crate-type = ["cdylib"]
+
+[features]
+boehm = []
+sgen = []
+
+[dependencies]
+ryu = { version = "1.0.11", features = ["no-panic", "small"] }
+utf16_lit = "2.0.2"
+# No UTF-16 support?
+# serde = { version = "1.0", default-features = false, features = ["derive"] }
+# serde-json-core = { version = "0.4", default-features = false }
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+opt-level = "z"
+lto = "fat"
+strip = true
+panic = "abort"
+codegen-units = 1

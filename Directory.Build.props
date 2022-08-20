@@ -11,6 +11,7 @@
         <TargetFramework>net472</TargetFramework>
         <LangVersion>latest</LangVersion>
         
+        <!-- <AssemblySearchPaths>$(AssemblySearchPaths);$(ChilloutVRPath)\MelonLoader;$(MsBuildThisFileDirectory)\ManagedLibs</AssemblySearchPaths> -->
         <AssemblySearchPaths>$(AssemblySearchPaths);$(ChilloutVRPath)\MelonLoader;$(ChilloutVRPath)\ChilloutVR_Data\Managed</AssemblySearchPaths>
     </PropertyGroup>
 
@@ -28,8 +29,41 @@
             <Private>False</Private>
             <SpecificVersion>False</SpecificVersion>
         </Reference>
+        <!-- Game libraries -->
+        <Reference Include="Cohtml.Runtime">
+            <Private>False</Private>
+            <SpecificVersion>False</SpecificVersion>
+        </Reference>
+        <Reference Include="cohtml.Net">
+            <Private>False</Private>
+            <SpecificVersion>False</SpecificVersion>
+        </Reference>
+        <Reference Include="DarkRift">
+            <Private>False</Private>
+            <SpecificVersion>False</SpecificVersion>
+        </Reference>
         <!-- Unity -->
         <Reference Include="UnityEngine.CoreModule">
+            <Private>False</Private>
+            <SpecificVersion>False</SpecificVersion>
+        </Reference>
+        <Reference Include="UnityEngine.AnimationModule">
+            <Private>False</Private>
+            <SpecificVersion>False</SpecificVersion>
+        </Reference>
+        <Reference Include="UnityEngine.PhysicsModule">
+            <Private>False</Private>
+            <SpecificVersion>False</SpecificVersion>
+        </Reference>
+        <Reference Include="UnityEngine.AudioModule">
+            <Private>False</Private>
+            <SpecificVersion>False</SpecificVersion>
+        </Reference>
+        <Reference Include="UnityEngine.AssetBundleModule">
+            <Private>False</Private>
+            <SpecificVersion>False</SpecificVersion>
+        </Reference>
+        <Reference Include="UnityEngine.JSONSerializeModule">
             <Private>False</Private>
             <SpecificVersion>False</SpecificVersion>
         </Reference>

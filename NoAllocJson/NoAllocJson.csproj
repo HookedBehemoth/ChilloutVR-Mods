@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CargoDir>native</CargoDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(OS)' == 'Windows_NT' ">
+    <CargoFlags>--target x86_64-pc-windows-msvc</CargoFlags>
+    <CargoTargetDir>$(CargoDir)/target/x86_64-pc-windows-msvc</CargoTargetDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(OS)' == 'Unix' ">
+    <!-- msvc target requires link.exe, not feasible on linux. -->
+    <CargoFlags>--target x86_64-pc-windows-gnu</CargoFlags>
+    <CargoTargetDir>$(CargoDir)/target/x86_64-pc-windows-gnu</CargoTargetDir>
+  </PropertyGroup>
+
+  <Target Name="Cargo build native library" BeforeTargets="PrepareForBuild">
+      <Exec Command="cargo build --release --manifest-path $(CargoDir)/Cargo.toml $(CargoFlags) --features boehm --lib"/>
+  </Target>
+
+  <Target Name="Cargo clean" AfterTargets="Clean">
+      <Exec Command="cargo clean --manifest-path $(CargoDir)/Cargo.toml"/>
+  </Target>
+
+  <ItemGroup>
+    <None Remove="fastser.dll" />
+    <EmbeddedResource Include="$(CargoTargetDir)/release/fastser.dll">
+      <LogicalName>fastser.dll</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>

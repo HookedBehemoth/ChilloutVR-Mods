@@ -5,3 +5,5 @@ bin
 Output
 *.bat
 *.sh
+ManagedLibs
+.vscode
